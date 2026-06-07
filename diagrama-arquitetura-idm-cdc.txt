@@ -1,0 +1,279 @@
+================================================================================
+DIAGRAMA DE ARQUITETURA - IBM InfoSphere Data Replication (CDC)
+PoC DB2 para DB2
+================================================================================
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          CAMADA DE GERENCIAMENTO                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    ┌──────────────────────────────────────────────────────────┐
+               🖥️  MÁQUINA WINDOWS                              
+    │                                                          │
+    │  ┌────────────────────────────────────────────────────┐  │
+    │  │     Management Console (Web Interface)             │  │
+    │  │                                                    │  │
+    │  │  • Configuração de subscrições                     │  │
+    │  │  • Monitoramento de replicação                     │  │
+    │  │  • Gerenciamento de mapeamentos                    │  │
+    │  │  • Dashboards e alertas                            │  │
+    │  └────────────────────────────────────────────────────┘  │
+    │                                                          │
+    │  Requisitos:                                             │
+    │  • Windows Server 2016+                                  │
+    │  • 8 GB RAM / 4 cores                                    │
+    │  • .NET Framework 4.7.2+                                 │
+    │  • Java JRE 8/11                                         │
+    └──────────────────────────────────────────────────────────┘
+                              │
+                              │ Porta 10101 (TCP)
+                              │ HTTPS/Management
+                              ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        CAMADA DE CONTROLE E ORQUESTRAÇÃO                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    ┌─────────────────────────────────────────────────────────┐
+    │         🐧  MÁQUINA LINUX RED HAT                       │
+    │                                                         │
+    │  ┌────────────────────────────────────────────────────┐ │
+    │  │           Access Server                            │ │
+    │  │                                                    │ │
+    │  │  • Ponto central de controle                       │ │
+    │  │  • Gerenciamento de agentes                        │ │
+    │  │  • Roteamento de metadados                         │ │
+    │  │  • Autenticação e segurança                        │ │
+    │  └────────────────────────────────────────────────────┘ │
+    │           │                             │               │
+    │           │                             │               │
+    │  ┌────────▼──────────┐        ┌─────────▼──────────┐    │
+    │  │  Capture Agent    │        │   Apply Agent      │    │
+    │  │  (Porta 11001)    │        │   (Porta 11101)    │    │
+    │  │                   │        │                    │    │
+    │  │ • Lê logs DB2     │        │ • Aplica mudanças  │    │
+    │  │ • Captura CDC     │        │ • Transforma dados │    │
+    │  │ • Staging area    │        │ • Resolve conflitos│    │
+    │  └───────────────────┘        └────────────────────┘    │
+    │                                                         │
+    │  Requisitos:                                            │
+    │  • RHEL 7.x/8.x                                         │
+    │  • 16 GB RAM / 8 cores                                  │
+    │  • 400 GB disco (staging)                               │
+    │  • Usuário: cdcuser                                     │
+    └─────────────────────────────────────────────────────────┘
+              │                                    │
+              │ Porta 50000                        │ Porta 50000
+              │ (DB2 Connection)                   │ (DB2 Connection)
+              ▼                                    ▼
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           CAMADA DE DADOS                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    ┌─────────────────────────────┐      ┌─────────────────────────────┐
+    │   💾  DB2 SOURCE            │      │   💾  DB2 TARGET            │
+    │   (Origem)                  │      │   (Destino)                 │
+    │                             │      │                             │
+    │  ┌───────────────────────┐  │      │  ┌───────────────────────┐  │
+    │  │  Database Production  │  │      │  │  Database Replica     │  │
+    │  │                       │  │      │  │                       │  │
+    │  │  • Tabelas origem     │  │      │  │  • Tabelas destino    │  │
+    │  │  • Schemas            │  │      │  │  • Schemas            │  │
+    │  │  • Log archiving ON   │  │      │  │  • Tablespaces        │  │
+    │  └───────────────────────┘  │      │  └───────────────────────┘  │
+    │                             │      │                             │
+    │  ┌───────────────────────┐  │      │  ┌───────────────────────┐  │
+    │  │  Transaction Logs     │  │      │  │  Replication Control  │  │
+    │  │  • Active logs        │  │      │  │  • Metadata tables    │  │
+    │  │  • Archive logs       │  │      │  │  • Bookmark tables    │  │
+    │  └───────────────────────┘  │      │  └───────────────────────┘  │
+    │                             │      │                             │
+    │  Usuário: cdccapture        │      │  Usuário: cdcapply          │
+    │  Permissões: DBADM          │      │  Permissões: DBADM          │
+    └─────────────────────────────┘      └─────────────────────────────┘
+
+
+================================================================================
+FLUXO DE DADOS (Change Data Capture)
+================================================================================
+
+    1. CAPTURA                2. STAGING              3. APLICAÇÃO
+    
+    ┌──────────┐             ┌──────────┐            ┌──────────┐
+    │  INSERT  │             │          │            │  INSERT  │
+    │  UPDATE  │────────────▶│  Queue   │───────────▶│  UPDATE  │
+    │  DELETE  │             │  Buffer  │            │  DELETE  │
+    └──────────┘             └──────────┘            └──────────┘
+         │                        │                        │
+    DB2 Source              Linux Staging             DB2 Target
+    Transaction Logs        (200 GB)                  Replica Tables
+
+
+================================================================================
+COMUNICAÇÃO ENTRE COMPONENTES
+================================================================================
+
+    Management Console (Windows)
+            │
+            │ Porta 10101 - Management Protocol
+            │ Porta 11701 - Web Console
+            ▼
+    Access Server (Linux)
+            │
+            ├─────────────────────────────────┐
+            │                                 │
+            │ Porta 11001                     │ Porta 11101
+            │ Control Protocol                │ Control Protocol
+            ▼                                 ▼
+    Capture Agent                     Apply Agent
+            │                                 │
+            │ Porta 50000                     │ Porta 50000
+            │ DB2 Protocol                    │ DB2 Protocol
+            ▼                                 ▼
+    DB2 Source                        DB2 Target
+
+
+================================================================================
+REQUISITOS DE REDE
+================================================================================
+
+    Largura de Banda:  ≥ 1 Gbps (mínimo 100 Mbps)
+    Latência:          < 10 ms entre componentes
+    Conectividade:     Todos os componentes devem se comunicar
+
+    Resolução de Nomes (DNS ou /etc/hosts):
+    ✓ Management Console ←→ Access Server
+    ✓ Access Server ←→ DB2 Source
+    ✓ Access Server ←→ DB2 Target
+
+
+================================================================================
+PORTAS DE FIREWALL (Resumo)
+================================================================================
+
+    ORIGEM                      DESTINO                 PORTA    PROTOCOLO
+    ─────────────────────────────────────────────────────────────────────────
+    Management Console    →     Access Server           10101    TCP
+    Management Console    →     Access Server           11701    TCP
+    Access Server         →     Capture Agent           11001    TCP
+    Access Server         →     Apply Agent             11101    TCP
+    Capture Agent         →     DB2 Source              50000    TCP
+    Apply Agent           →     DB2 Target              50000    TCP
+
+
+================================================================================
+TIPOS DE REPLICAÇÃO SUPORTADOS
+================================================================================
+
+    ┌─────────────────────────────────────────────────────────────┐
+    │  1. REFRESH (Carga Inicial)                                 │
+    │     • Cópia completa dos dados                              │
+    │     • Sincronização inicial                                 │
+    │     • Pode ser agendada                                     │
+    └─────────────────────────────────────────────────────────────┘
+
+    ┌─────────────────────────────────────────────────────────────┐
+    │  2. MIRROR (Replicação Contínua)                            │
+    │     • Captura em tempo real                                 │
+    │     • Latência mínima (segundos)                            │
+    │     • Transações aplicadas continuamente                    │
+    └─────────────────────────────────────────────────────────────┘
+
+    ┌─────────────────────────────────────────────────────────────┐
+    │  3. REFRESH + MIRROR (Híbrido)                              │
+    │     • Carga inicial seguida de CDC                          │
+    │     • Modo mais comum em produção                           │
+    │     • Sincronização completa e contínua                     │
+    └─────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+COMPONENTES DE ARMAZENAMENTO
+================================================================================
+
+    LINUX RED HAT (400 GB Total):
+    
+    ┌────────────────────────────────────────────────────────────┐
+    │  /opt/ibm/InfoSphereDataReplication     (100 GB)           │
+    │  • Binários e executáveis                                  │
+    │  • Bibliotecas e dependências                              │
+    └────────────────────────────────────────────────────────────┘
+    
+    ┌────────────────────────────────────────────────────────────┐
+    │  /staging/cdc                           (200 GB)           │
+    │  • Fila de transações                                      │
+    │  • Buffer de dados                                         │
+    │  • Dados temporários                                       │
+    └────────────────────────────────────────────────────────────┘
+    
+    ┌────────────────────────────────────────────────────────────┐
+    │  /var/log/cdc                           (50 GB)            │
+    │  • Logs de captura                                         │
+    │  • Logs de aplicação                                       │
+    │  • Logs de auditoria                                       │
+    └────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+MONITORAMENTO E CONTROLE
+================================================================================
+
+    Management Console fornece:
+    
+    ┌─────────────────────────────────────────────────────────────┐
+    │  📊 DASHBOARDS                                              │
+    │  • Status de subscrições                                    │
+    │  • Latência de replicação                                   │
+    │  • Throughput (registros/segundo)                           │
+    │  • Uso de recursos (CPU, memória, disco)                    │
+    └─────────────────────────────────────────────────────────────┘
+    
+    ┌─────────────────────────────────────────────────────────────┐
+    │  🔔 ALERTAS                                                 │
+    │  • Falhas de conexão                                        │
+    │  • Latência alta                                            │
+    │  • Erros de aplicação                                       │
+    │  • Espaço em disco baixo                                    │
+    └─────────────────────────────────────────────────────────────┘
+    
+    ┌─────────────────────────────────────────────────────────────┐
+    │  📈 MÉTRICAS                                                │
+    │  • Registros capturados                                     │
+    │  • Registros aplicados                                      │
+    │  • Conflitos resolvidos                                     │
+    │  • Performance histórica                                    │
+    └─────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+LEGENDA
+================================================================================
+
+    🖥️  = Máquina Windows
+    🐧  = Máquina Linux
+    💾  = Banco de Dados DB2
+    →   = Fluxo de dados/comunicação
+    ▼   = Direção do fluxo
+    │   = Conexão/Relacionamento
+    ┌─┐ = Componente/Container
+    └─┘
+
+
+================================================================================
+NOTAS IMPORTANTES
+================================================================================
+
+1. Todos os componentes devem estar na mesma rede ou com conectividade 
+   garantida via VPN.
+
+2. A latência de rede é crítica para performance da replicação em tempo real.
+
+3. O staging area (200 GB) deve ser dimensionado conforme volume de transações.
+
+4. Recomenda-se monitoramento contínuo durante a PoC para ajustes de 
+   performance.
+
+5. Backup dos bancos de dados deve ser realizado antes de iniciar a replicação.
+
+================================================================================

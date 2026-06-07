@@ -1,0 +1,585 @@
+================================================================================
+DIAGRAMA DE ARQUITETURA - IBM InfoSphere Data Replication (CDC)
+Arquitetura Simplificada - PoC DB2/PostgreSQL/MySQL
+================================================================================
+
+## Visão Geral
+Esta arquitetura consolida Management Console e Access Server em uma única 
+máquina Windows, com agentes CDC co-localizados nos servidores de banco de dados.
+
+================================================================================
+ARQUITETURA COMPLETA
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    CAMADA DE GERENCIAMENTO E CONTROLE                       │
+│                          (Máquina Windows Única)                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    ┌──────────────────────────────────────────────────────────────────────┐
+    │                    🖥️  MÁQUINA WINDOWS                               │
+    │                                                                       │
+    │  ┌────────────────────────────┐  ┌────────────────────────────────┐  │
+    │  │  Management Console        │  │  Access Server                 │  │
+    │  │  (Interface Web)           │  │  (Controle Central)            │  │
+    │  │                            │  │                                │  │
+    │  │  • Porta 11701 (Web UI)    │  │  • Porta 10101 (Management)    │  │
+    │  │  • Configuração de         │  │  • Gerenciamento de agentes    │  │
+    │  │    subscrições             │  │  • Roteamento de metadados     │  │
+    │  │  • Monitoramento           │  │  • Autenticação e segurança    │  │
+    │  │  • Dashboards e alertas    │  │  • Comunicação com agentes     │  │
+    │  └────────────────────────────┘  └────────────────────────────────┘  │
+    │                                                                       │
+    │  Requisitos:                                                          │
+    │  • Windows Server 2016+ (64-bit)                                      │
+    │  • 16 GB RAM (recomendado 32 GB)                                      │
+    │  • 8 cores (recomendado 16 cores)                                     │
+    │  • 200 GB disco livre                                                 │
+    │  • .NET Framework 4.7.2+                                              │
+    │  • Java JRE 8 ou 11 (64-bit)                                          │
+    └──────────────────────────────────────────────────────────────────────┘
+                    │                                    │
+                    │ Porta 11001                        │ Porta 11101
+                    │ (Controle Capture)                 │ (Controle Apply)
+                    │                                    │
+                    ▼                                    ▼
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      CAMADA DE DADOS E AGENTES CDC                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    ┌────────────────────────────────┐      ┌────────────────────────────────┐
+    │   🖥️  SERVIDOR SOURCE          │      │   🖥️  SERVIDOR TARGET          │
+    │   (Origem dos Dados)           │      │   (Destino dos Dados)          │
+    │                                │      │                                │
+    │  ┌──────────────────────────┐  │      │  ┌──────────────────────────┐  │
+    │  │  Capture Agent           │  │      │  │  Apply Agent             │  │
+    │  │  (Porta 11001)           │  │      │  │  (Porta 11101)           │  │
+    │  │                          │  │      │  │                          │  │
+    │  │  • Lê transaction logs   │  │      │  │  • Recebe dados CDC      │  │
+    │  │  • Captura CDC           │  │      │  │  • Transforma dados      │  │
+    │  │  • Staging area local    │  │      │  │  • Resolve conflitos     │  │
+    │  │  • Envia para Apply      │──┼──────┼─▶│  • Aplica mudanças       │  │
+    │  └──────────────────────────┘  │      │  └──────────────────────────┘  │
+    │              │                  │      │              │                 │
+    │              │ Acesso local     │      │              │ Acesso local    │
+    │              ▼                  │      │              ▼                 │
+    │  ┌──────────────────────────┐  │      │  ┌──────────────────────────┐  │
+    │  │  💾 Banco de Dados       │  │      │  │  💾 Banco de Dados       │  │
+    │  │  SOURCE                  │  │      │  │  TARGET                  │  │
+    │  │                          │  │      │  │                          │  │
+    │  │  DB2 / PostgreSQL / MySQL│  │      │  │  DB2 / PostgreSQL / MySQL│  │
+    │  │                          │  │      │  │                          │  │
+    │  │  • Tabelas origem        │  │      │  │  • Tabelas replicadas    │  │
+    │  │  • Transaction logs      │  │      │  │  • Control tables        │  │
+    │  │  • Log archiving ON      │  │      │  │  • Metadata tables       │  │
+    │  │  • Usuário: cdccapture   │  │      │  │  • Usuário: cdcapply     │  │
+    │  │                          │  │      │  │                          │  │
+    │  │  Porta DB:               │  │      │  │  Porta DB:               │  │
+    │  │  • DB2: 50000            │  │      │  │  • DB2: 50000            │  │
+    │  │  • PostgreSQL: 5432      │  │      │  │  • PostgreSQL: 5432      │  │
+    │  │  • MySQL: 3306           │  │      │  │  • MySQL: 3306           │  │
+    │  └──────────────────────────┘  │      │  └──────────────────────────┘  │
+    │                                │      │                                │
+    │  Requisitos do Servidor:       │      │  Requisitos do Servidor:       │
+    │  • Linux/Windows               │      │  • Linux/Windows               │
+    │  • 16 GB RAM (mín 8 GB)        │      │  • 16 GB RAM (mín 8 GB)        │
+    │  • 8 cores (mín 4 cores)       │      │  • 8 cores (mín 4 cores)       │
+    │  • 200 GB disco (staging+logs) │      │  • 200 GB disco (dados+control)│
+    └────────────────────────────────┘      └────────────────────────────────┘
+
+
+================================================================================
+FLUXO DE DADOS DETALHADO
+================================================================================
+
+1. CAPTURA (Capture Agent no Servidor Source)
+   ┌─────────────────────────────────────────────────────────────────┐
+   │  a) Capture Agent lê transaction logs do banco de dados         │
+   │  b) Identifica operações DML (INSERT, UPDATE, DELETE)           │
+   │  c) Extrai dados modificados e metadados                        │
+   │  d) Armazena temporariamente em staging area local              │
+   │  e) Formata dados no formato CDC                                │
+   └─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+2. TRANSMISSÃO (Entre Agentes)
+   ┌─────────────────────────────────────────────────────────────────┐
+   │  a) Capture Agent envia dados via rede para Apply Agent         │
+   │  b) Protocolo otimizado com compressão (opcional)               │
+   │  c) Controle de fluxo e buffer de rede                          │
+   │  d) Garantia de entrega e ordenação                             │
+   └─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+3. APLICAÇÃO (Apply Agent no Servidor Target)
+   ┌─────────────────────────────────────────────────────────────────┐
+   │  a) Apply Agent recebe dados do Capture Agent                   │
+   │  b) Aplica transformações e mapeamentos configurados            │
+   │  c) Resolve conflitos (se houver)                               │
+   │  d) Executa operações no banco de dados target                  │
+   │  e) Atualiza tabelas de controle e bookmarks                    │
+   │  f) Confirma aplicação bem-sucedida                             │
+   └─────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+COMUNICAÇÃO ENTRE COMPONENTES
+================================================================================
+
+Management Console (Windows)
+        │
+        │ Porta 11701 - Interface Web HTTPS
+        │ Usuário acessa via navegador
+        │
+        ▼
+Access Server (Windows - mesma máquina)
+        │
+        ├─────────────────────────────────────┐
+        │                                     │
+        │ Porta 11001                         │ Porta 11101
+        │ Protocolo de Controle               │ Protocolo de Controle
+        │ (comandos, status, config)          │ (comandos, status, config)
+        │                                     │
+        ▼                                     ▼
+Capture Agent (Servidor Source)      Apply Agent (Servidor Target)
+        │                                     │
+        │ Porta DB (local)                    │ Porta DB (local)
+        │ • DB2: 50000                        │ • DB2: 50000
+        │ • PostgreSQL: 5432                  │ • PostgreSQL: 5432
+        │ • MySQL: 3306                       │ • MySQL: 3306
+        │                                     │
+        ▼                                     ▼
+Banco Source                          Banco Target
+(leitura de logs)                     (escrita de dados)
+
+        │                                     │
+        │  Porta customizada (ex: 10001)      │
+        │  Protocolo CDC - Fluxo de Dados     │
+        └─────────────────────────────────────┘
+                Capture → Apply
+                (Transações CDC)
+
+
+================================================================================
+REQUISITOS DE REDE E CONECTIVIDADE
+================================================================================
+
+CONECTIVIDADE NECESSÁRIA:
+┌────────────────────────────────────────────────────────────────────────────┐
+│  Origem                    Destino                  Porta      Protocolo   │
+├────────────────────────────────────────────────────────────────────────────┤
+│  Usuário/Admin       →     Management Console       11701      HTTPS       │
+│  Management Console  →     Access Server            10101      TCP         │
+│  Access Server       →     Capture Agent            11001      TCP         │
+│  Access Server       →     Apply Agent              11101      TCP         │
+│  Capture Agent       →     DB Source                50000*     TCP         │
+│  Apply Agent         →     DB Target                50000*     TCP         │
+│  Capture Agent       →     Apply Agent              10001**    TCP         │
+└────────────────────────────────────────────────────────────────────────────┘
+
+* Portas de banco de dados:
+  - DB2: 50000 (padrão, configurável)
+  - PostgreSQL: 5432 (padrão, configurável)
+  - MySQL: 3306 (padrão, configurável)
+
+** Porta de dados CDC entre agentes (configurável, exemplo: 10001)
+
+REQUISITOS DE LARGURA DE BANDA:
+• Mínimo: 100 Mbps
+• Recomendado: 1 Gbps ou superior
+• Ideal: 10 Gbps para grandes volumes
+
+REQUISITOS DE LATÊNCIA:
+• Entre Management Console e Agentes: < 50ms
+• Entre Capture e Apply Agents: < 10ms (crítico para performance)
+• Entre Agentes e Bancos de Dados: < 5ms (acesso local preferencial)
+
+RESOLUÇÃO DE NOMES:
+Todos os servidores devem resolver nomes entre si via:
+• DNS corporativo (recomendado)
+• Arquivo hosts (alternativa):
+  - Windows: C:\Windows\System32\drivers\etc\hosts
+  - Linux: /etc/hosts
+
+
+================================================================================
+PORTAS DE BANCO DE DADOS POR TIPO
+================================================================================
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│  Banco de Dados    │  Porta Padrão  │  Protocolo  │  Configuração         │
+├────────────────────────────────────────────────────────────────────────────┤
+│  IBM DB2           │  50000         │  TCP        │  DB2 Configuration    │
+│                    │                │             │  Manager (db2set)     │
+├────────────────────────────────────────────────────────────────────────────┤
+│  PostgreSQL        │  5432          │  TCP        │  postgresql.conf      │
+│                    │                │             │  (port parameter)     │
+├────────────────────────────────────────────────────────────────────────────┤
+│  MySQL/MariaDB     │  3306          │  TCP        │  my.cnf ou my.ini     │
+│                    │                │             │  (port parameter)     │
+└────────────────────────────────────────────────────────────────────────────┘
+
+OBSERVAÇÕES IMPORTANTES:
+• As portas acima são padrões e podem ser alteradas na configuração do SGBD
+• Certifique-se de que os agentes CDC têm acesso às portas configuradas
+• Firewalls locais e de rede devem permitir comunicação nas portas necessárias
+• Para ambientes de alta segurança, considere usar SSL/TLS para conexões
+
+
+================================================================================
+REQUISITOS DETALHADOS POR COMPONENTE
+================================================================================
+
+1. MÁQUINA WINDOWS (Management Console + Access Server)
+   ─────────────────────────────────────────────────────
+   Hardware:
+   • CPU: 8 cores (recomendado 16 cores)
+   • RAM: 16 GB (recomendado 32 GB)
+   • Disco: 200 GB livres
+     - Sistema: 50 GB
+     - Instalação IDM: 100 GB
+     - Logs e configurações: 50 GB
+   • Rede: Gigabit Ethernet
+
+   Software:
+   • Windows Server 2016 ou superior (64-bit)
+   • .NET Framework 4.7.2 ou superior
+   • Java Runtime Environment (JRE) 8 ou 11 (64-bit)
+   • Microsoft Visual C++ Redistributable 2015-2019
+
+   Configurações:
+   • Usuário com privilégios de Administrador
+   • Firewall configurado (portas 10101, 11001, 11101, 11701)
+   • Antivírus com exceções para diretórios IDM
+   • Resolução de nomes configurada (DNS ou hosts)
+
+2. SERVIDOR SOURCE (Banco de Dados + Capture Agent)
+   ─────────────────────────────────────────────────
+   Hardware:
+   • CPU: 8 cores (recomendado 16 cores)
+   • RAM: 16 GB (recomendado 32 GB)
+   • Disco: 300 GB livres
+     - Banco de dados: 100 GB
+     - Transaction logs: 100 GB
+     - Staging CDC: 100 GB
+   • Rede: Gigabit Ethernet (recomendado 10 Gbps)
+
+   Software:
+   • Linux (RHEL/Ubuntu/SLES) ou Windows Server
+   • DB2 10.5+ / PostgreSQL 9.6+ / MySQL 5.7+
+   • Agente CDC para o banco específico
+
+   Configurações Banco de Dados:
+   
+   DB2:
+   • Log archiving habilitado:
+     UPDATE DB CFG FOR <dbname> USING LOGARCHMETH1 DISK:/path/to/archive
+     UPDATE DB CFG FOR <dbname> USING LOGRETAIN RECOVERY
+   • Usuário cdccapture com permissões DBADM
+   
+   PostgreSQL:
+   • Replicação lógica habilitada:
+     wal_level = logical
+     max_replication_slots = 10
+     max_wal_senders = 10
+   • Usuário cdccapture com permissões REPLICATION
+   
+   MySQL:
+   • Binary logging habilitado:
+     log-bin = mysql-bin
+     binlog_format = ROW
+     binlog_row_image = FULL
+   • Usuário cdccapture com permissões REPLICATION SLAVE, REPLICATION CLIENT
+
+3. SERVIDOR TARGET (Banco de Dados + Apply Agent)
+   ────────────────────────────────────────────────
+   Hardware:
+   • CPU: 8 cores (recomendado 16 cores)
+   • RAM: 16 GB (recomendado 32 GB)
+   • Disco: 300 GB livres
+     - Banco de dados: 150 GB
+     - Tabelas de controle: 50 GB
+     - Logs: 100 GB
+   • Rede: Gigabit Ethernet (recomendado 10 Gbps)
+
+   Software:
+   • Linux (RHEL/Ubuntu/SLES) ou Windows Server
+   • DB2 10.5+ / PostgreSQL 9.6+ / MySQL 5.7+
+   • Agente CDC para o banco específico
+
+   Configurações Banco de Dados:
+   • Tablespaces criados com espaço suficiente
+   • Esquemas de destino preparados
+   • Usuário cdcapply com permissões:
+     - DB2: DBADM
+     - PostgreSQL: CREATE, INSERT, UPDATE, DELETE
+     - MySQL: INSERT, UPDATE, DELETE, CREATE
+
+
+================================================================================
+TIPOS DE REPLICAÇÃO SUPORTADOS
+================================================================================
+
+1. REFRESH (Carga Inicial)
+   ┌─────────────────────────────────────────────────────────────────┐
+   │  • Cópia completa dos dados de tabelas selecionadas             │
+   │  • Sincronização inicial antes de iniciar CDC                   │
+   │  • Pode ser executado sob demanda ou agendado                   │
+   │  • Útil para sincronizar dados históricos                       │
+   │  • Tempo de execução depende do volume de dados                 │
+   └─────────────────────────────────────────────────────────────────┘
+
+2. MIRROR (Replicação Contínua)
+   ┌─────────────────────────────────────────────────────────────────┐
+   │  • Captura em tempo real de mudanças (CDC)                      │
+   │  • Latência mínima (segundos)                                   │
+   │  • Transações aplicadas continuamente                           │
+   │  • Mantém sincronização constante                               │
+   │  • Ideal para ambientes de alta disponibilidade                 │
+   └─────────────────────────────────────────────────────────────────┘
+
+3. REFRESH + MIRROR (Híbrido - Mais Comum)
+   ┌─────────────────────────────────────────────────────────────────┐
+   │  • Fase 1: Carga inicial completa (REFRESH)                     │
+   │  • Fase 2: Ativação de CDC contínuo (MIRROR)                    │
+   │  • Sincronização completa seguida de manutenção em tempo real   │
+   │  • Modo recomendado para produção                               │
+   │  • Garante consistência inicial e atualização contínua          │
+   └─────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+COMPONENTES DE ARMAZENAMENTO
+================================================================================
+
+MÁQUINA WINDOWS (200 GB Total):
+┌────────────────────────────────────────────────────────────────────────────┐
+│  C:\Program Files\IBM\InfoSphereDataReplication     (100 GB)               │
+│  • Binários do Management Console                                          │
+│  • Binários do Access Server                                               │
+│  • Bibliotecas e dependências                                              │
+│  • Arquivos de configuração                                                │
+├────────────────────────────────────────────────────────────────────────────┤
+│  C:\ProgramData\IBM\CDC\Logs                        (50 GB)                │
+│  • Logs do Access Server                                                   │
+│  • Logs do Management Console                                              │
+│  • Logs de auditoria                                                       │
+├────────────────────────────────────────────────────────────────────────────┤
+│  C:\ProgramData\IBM\CDC\Config                      (50 GB)                │
+│  • Configurações de subscrições                                            │
+│  • Metadados de mapeamentos                                                │
+│  • Backups de configuração                                                 │
+└────────────────────────────────────────────────────────────────────────────┘
+
+SERVIDOR SOURCE (300 GB Total):
+┌────────────────────────────────────────────────────────────────────────────┐
+│  /opt/ibm/cdc/capture (ou C:\IBM\CDC\Capture)      (50 GB)                │
+│  • Binários do Capture Agent                                               │
+│  • Bibliotecas específicas do banco de dados                               │
+├────────────────────────────────────────────────────────────────────────────┤
+│  /staging/cdc (ou D:\CDC\Staging)                  (100 GB)               │
+│  • Buffer de transações capturadas                                         │
+│  • Fila de dados CDC                                                       │
+│  • Dados temporários                                                       │
+├────────────────────────────────────────────────────────────────────────────┤
+│  /var/log/cdc (ou D:\CDC\Logs)                     (50 GB)                │
+│  • Logs do Capture Agent                                                   │
+│  • Logs de diagnóstico                                                     │
+├────────────────────────────────────────────────────────────────────────────┤
+│  /database/logs (ou E:\DB\Logs)                    (100 GB)               │
+│  • Transaction logs do banco de dados                                      │
+│  • Archive logs                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
+
+SERVIDOR TARGET (300 GB Total):
+┌────────────────────────────────────────────────────────────────────────────┐
+│  /opt/ibm/cdc/apply (ou C:\IBM\CDC\Apply)          (50 GB)                │
+│  • Binários do Apply Agent                                                 │
+│  • Bibliotecas específicas do banco de dados                               │
+├────────────────────────────────────────────────────────────────────────────┤
+│  /database/data (ou D:\DB\Data)                    (150 GB)               │
+│  • Tabelas replicadas                                                      │
+│  • Índices                                                                 │
+│  • Tablespaces                                                             │
+├────────────────────────────────────────────────────────────────────────────┤
+│  /database/control (ou D:\DB\Control)              (50 GB)                │
+│  • Tabelas de controle CDC                                                 │
+│  • Metadata tables                                                         │
+│  • Bookmark tables                                                         │
+├────────────────────────────────────────────────────────────────────────────┤
+│  /var/log/cdc (ou D:\CDC\Logs)                     (50 GB)                │
+│  • Logs do Apply Agent                                                     │
+│  • Logs de aplicação                                                       │
+│  • Logs de conflitos                                                       │
+└────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+MONITORAMENTO E CONTROLE
+================================================================================
+
+MANAGEMENT CONSOLE - Dashboards Disponíveis:
+┌────────────────────────────────────────────────────────────────────────────┐
+│  📊 STATUS DE SUBSCRIÇÕES                                                  │
+│  • Estado atual (Running, Stopped, Error)                                  │
+│  • Tempo de atividade (uptime)                                             │
+│  • Última atualização                                                      │
+│  • Número de tabelas replicadas                                            │
+├────────────────────────────────────────────────────────────────────────────┤
+│  ⏱️  LATÊNCIA DE REPLICAÇÃO                                                │
+│  • Tempo entre captura e aplicação                                         │
+│  • Latência média, mínima e máxima                                         │
+│  • Gráficos históricos                                                     │
+│  • Alertas de latência alta                                                │
+├────────────────────────────────────────────────────────────────────────────┤
+│  📈 THROUGHPUT                                                             │
+│  • Registros capturados por segundo                                        │
+│  • Registros aplicados por segundo                                         │
+│  • Volume de dados (MB/s)                                                  │
+│  • Picos e médias                                                          │
+├────────────────────────────────────────────────────────────────────────────┤
+│  💻 USO DE RECURSOS                                                        │
+│  • CPU dos agentes                                                         │
+│  • Memória utilizada                                                       │
+│  • Espaço em disco (staging e logs)                                        │
+│  • Uso de rede                                                             │
+├────────────────────────────────────────────────────────────────────────────┤
+│  ⚠️  ALERTAS E ERROS                                                       │
+│  • Falhas de conexão                                                       │
+│  • Erros de aplicação                                                      │
+│  • Conflitos de dados                                                      │
+│  • Espaço em disco baixo                                                   │
+│  • Latência acima do threshold                                             │
+├────────────────────────────────────────────────────────────────────────────┤
+│  📊 MÉTRICAS DETALHADAS                                                    │
+│  • Total de registros replicados                                           │
+│  • Operações por tipo (INSERT/UPDATE/DELETE)                               │
+│  • Tabelas mais ativas                                                     │
+│  • Performance histórica                                                   │
+│  • Relatórios customizados                                                 │
+└────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+CHECKLIST DE IMPLEMENTAÇÃO
+================================================================================
+
+FASE 1: PREPARAÇÃO DO AMBIENTE
+[ ] Provisionar máquina Windows para Management Console + Access Server
+[ ] Provisionar servidores para bancos de dados Source e Target
+[ ] Instalar e configurar bancos de dados (DB2/PostgreSQL/MySQL)
+[ ] Configurar rede e resolução de nomes (DNS ou hosts)
+[ ] Abrir portas de firewall necessárias
+[ ] Criar usuários CDC nos bancos de dados (cdccapture, cdcapply)
+[ ] Habilitar log archiving/replication nos bancos source
+
+FASE 2: INSTALAÇÃO DE SOFTWARE
+[ ] Instalar Management Console na máquina Windows
+[ ] Instalar Access Server na máquina Windows
+[ ] Instalar Capture Agent no servidor source
+[ ] Instalar Apply Agent no servidor target
+[ ] Aplicar patches e fix packs mais recentes
+[ ] Validar instalações e versões
+
+FASE 3: CONFIGURAÇÃO INICIAL
+[ ] Configurar Access Server (porta, segurança, etc.)
+[ ] Registrar Capture Agent no Access Server
+[ ] Registrar Apply Agent no Access Server
+[ ] Configurar conexões com bancos de dados
+[ ] Testar conectividade entre todos os componentes
+[ ] Configurar usuários e permissões no Management Console
+
+FASE 4: CONFIGURAÇÃO DE REPLICAÇÃO
+[ ] Criar subscrição no Management Console
+[ ] Selecionar tabelas para replicação
+[ ] Configurar mapeamentos (source → target)
+[ ] Definir transformações (se necessário)
+[ ] Configurar filtros (se necessário)
+[ ] Definir modo de replicação (Refresh, Mirror ou ambos)
+[ ] Configurar parâmetros de performance
+
+FASE 5: TESTES E VALIDAÇÃO
+[ ] Executar Refresh inicial (carga completa)
+[ ] Validar dados replicados
+[ ] Iniciar Mirror (CDC contínuo)
+[ ] Executar testes de INSERT, UPDATE, DELETE no source
+[ ] Validar aplicação no target
+[ ] Medir latência de replicação
+[ ] Testar cenários de falha e recuperação
+[ ] Validar monitoramento e alertas
+
+FASE 6: DOCUMENTAÇÃO E HANDOVER
+[ ] Documentar configurações realizadas
+[ ] Documentar procedimentos operacionais
+[ ] Treinar equipe de operações
+[ ] Estabelecer procedimentos de backup
+[ ] Definir plano de manutenção
+[ ] Documentar lições aprendidas
+
+
+================================================================================
+OBSERVAÇÕES IMPORTANTES
+================================================================================
+
+1. VANTAGENS DESTA ARQUITETURA SIMPLIFICADA:
+   • Redução de custos (menos máquinas)
+   • Menor complexidade de gerenciamento
+   • Acesso local dos agentes aos bancos de dados (melhor performance)
+   • Consolidação de componentes de gerenciamento em uma única máquina
+
+2. CONSIDERAÇÕES DE PERFORMANCE:
+   • Agentes co-localizados têm acesso mais rápido aos bancos de dados
+   • Latência de rede reduzida entre agente e banco
+   • Staging area local melhora throughput
+   • Importante dimensionar recursos adequadamente nos servidores de BD
+
+3. SEGURANÇA:
+   • Isolar rede de replicação (VLAN dedicada recomendada)
+   • Usar SSL/TLS para comunicação entre componentes
+   • Implementar autenticação forte
+   • Auditar acessos e operações
+   • Criptografar dados em trânsito e em repouso
+
+4. ALTA DISPONIBILIDADE:
+   • Considerar cluster para Management Console/Access Server
+   • Implementar redundância de agentes (standby)
+   • Configurar failover automático
+   • Manter backups regulares de configurações
+
+5. MONITORAMENTO CONTÍNUO:
+   • Configurar alertas proativos
+   • Monitorar latência constantemente
+   • Acompanhar uso de recursos
+   • Revisar logs regularmente
+   • Estabelecer SLAs de replicação
+
+6. MANUTENÇÃO:
+   • Aplicar patches regularmente
+   • Limpar logs antigos
+   • Revisar e otimizar configurações
+   • Testar procedimentos de recuperação
+   • Manter documentação atualizada
+
+
+================================================================================
+SUPORTE E RECURSOS
+================================================================================
+
+IBM Knowledge Center:
+• https://www.ibm.com/docs/en/idr
+
+IBM Support:
+• https://www.ibm.com/support
+
+Comunidade IBM:
+• https://community.ibm.com
+
+Treinamentos:
+• IBM Training - InfoSphere Data Replication
+
+Contato Suporte IBM:
+• Abrir caso via IBM Support Portal
+• Ter contrato de suporte ativo
+
+================================================================================

@@ -1,0 +1,872 @@
+================================================================================
+PORTAS PADRÃO DOS AGENTES CDC POR TIPO DE BANCO DE DADOS
+IBM InfoSphere Data Replication
+================================================================================
+
+## Visão Geral
+Este documento especifica as portas padrão utilizadas pelos agentes CDC 
+(Capture e Apply) para cada tipo de banco de dados suportado.
+
+================================================================================
+PORTAS DOS AGENTES CDC - TABELA RESUMIDA
+================================================================================
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│  Banco de Dados    │  Capture Agent  │  Apply Agent   │  Observações       │
+│                    │  (Porta Padrão) │  (Porta Padrão)│                    │
+├────────────────────────────────────────────────────────────────────────────┤
+│  IBM DB2           │     11001       │     11101      │  Portas TCP        │
+│  (DB2 for LUW)     │                 │                │  Configuráveis     │
+├────────────────────────────────────────────────────────────────────────────┤
+│  PostgreSQL        │     11002       │     11102      │  Portas TCP        │
+│                    │                 │                │  Configuráveis     │
+├────────────────────────────────────────────────────────────────────────────┤
+│  MySQL / MariaDB   │     11003       │     11103      │  Portas TCP        │
+│                    │                 │                │  Configuráveis     │
+└────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+DETALHAMENTO POR BANCO DE DADOS
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  1. IBM DB2 (DB2 for Linux, Unix, Windows)                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    CAPTURE AGENT (DB2 Source):
+    ┌──────────────────────────────────────────────────────────────────────┐
+    │  Porta Padrão:        11001 (TCP)                                    │
+    │  Protocolo:           TCP/IP                                         │
+    │  Direção:             Inbound (recebe conexões do Access Server)     │
+    │  Configurável:        Sim (via dmconfigurets ou arquivo de config)   │
+    │  Arquivo Config:      instance_name.conf                             │
+    │  Parâmetro:           port=11001                                     │
+    └──────────────────────────────────────────────────────────────────────┘
+
+    APPLY AGENT (DB2 Target):
+    ┌──────────────────────────────────────────────────────────────────────┐
+    │  Porta Padrão:        11101 (TCP)                                    │
+    │  Protocolo:           TCP/IP                                         │
+    │  Direção:             Inbound (recebe conexões do Access Server)     │
+    │  Configurável:        Sim (via dmconfigurets ou arquivo de config)   │
+    │  Arquivo Config:      instance_name.conf                             │
+    │  Parâmetro:           port=11101                                     │
+    └──────────────────────────────────────────────────────────────────────┘
+
+    COMUNICAÇÃO ENTRE AGENTES:
+    ┌──────────────────────────────────────────────────────────────────────┐
+    │  Porta de Dados CDC:  10001 (TCP) - padrão                           │
+    │  Direção:             Capture → Apply                                │
+    │  Configurável:        Sim (definida na subscrição)                   │
+    │  Observação:          Porta usada para transmissão de dados CDC      │
+    └──────────────────────────────────────────────────────────────────────┘
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  2. PostgreSQL                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    CAPTURE AGENT (PostgreSQL Source):
+    ┌──────────────────────────────────────────────────────────────────────┐
+    │  Porta Padrão:        11002 (TCP)                                    │
+    │  Protocolo:           TCP/IP                                         │
+    │  Direção:             Inbound (recebe conexões do Access Server)     │
+    │  Configurável:        Sim (via dmconfigurets ou arquivo de config)   │
+    │  Arquivo Config:      instance_name.conf                             │
+    │  Parâmetro:           port=11002                                     │
+    └──────────────────────────────────────────────────────────────────────┘
+
+    APPLY AGENT (PostgreSQL Target):
+    ┌──────────────────────────────────────────────────────────────────────┐
+    │  Porta Padrão:        11102 (TCP)                                    │
+    │  Protocolo:           TCP/IP                                         │
+    │  Direção:             Inbound (recebe conexões do Access Server)     │
+    │  Configurável:        Sim (via dmconfigurets ou arquivo de config)   │
+    │  Arquivo Config:      instance_name.conf                             │
+    │  Parâmetro:           port=11102                                     │
+    └──────────────────────────────────────────────────────────────────────┘
+
+    COMUNICAÇÃO ENTRE AGENTES:
+    ┌──────────────────────────────────────────────────────────────────────┐
+    │  Porta de Dados CDC:  10002 (TCP) - padrão                           │
+    │  Direção:             Capture → Apply                                │
+    │  Configurável:        Sim (definida na subscrição)                   │
+    │  Observação:          Porta usada para transmissão de dados CDC      │
+    └──────────────────────────────────────────────────────────────────────┘
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  3. MySQL / MariaDB                                                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    CAPTURE AGENT (MySQL Source):
+    ┌──────────────────────────────────────────────────────────────────────┐
+    │  Porta Padrão:        11003 (TCP)                                    │
+    │  Protocolo:           TCP/IP                                         │
+    │  Direção:             Inbound (recebe conexões do Access Server)     │
+    │  Configurável:        Sim (via dmconfigurets ou arquivo de config)   │
+    │  Arquivo Config:      instance_name.conf                             │
+    │  Parâmetro:           port=11003                                     │
+    └──────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+USUÁRIOS DO SISTEMA OPERACIONAL PARA AGENTES CDC
+================================================================================
+
+Os agentes CDC (Capture e Apply) devem ser executados sob usuários dedicados
+do sistema operacional para melhor segurança e gerenciamento.
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  SERVIDOR SOURCE - Usuário para Capture Agent                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+LINUX:
+┌────────────────────────────────────────────────────────────────────────────┐
+│  # Criar grupo                                                             │
+│  groupadd cdcgroup                                                         │
+│                                                                             │
+│  # Criar usuário cdcuser                                                   │
+│  useradd -m -g cdcgroup -s /bin/bash cdcuser                               │
+│                                                                             │
+│  # Definir senha                                                           │
+│  passwd cdcuser                                                            │
+│                                                                             │
+│  # Criar diretórios necessários                                            │
+│  mkdir -p /opt/ibm/cdc/capture                                             │
+│  mkdir -p /staging/cdc                                                     │
+│  mkdir -p /var/log/cdc                                                     │
+│                                                                             │
+│  # Definir permissões                                                      │
+│  chown -R cdcuser:cdcgroup /opt/ibm/cdc                                    │
+│  chown -R cdcuser:cdcgroup /staging/cdc                                    │
+│  chown -R cdcuser:cdcgroup /var/log/cdc                                    │
+│                                                                             │
+│  # Permissões de diretório                                                 │
+│  chmod 755 /opt/ibm/cdc/capture                                            │
+│  chmod 755 /staging/cdc                                                    │
+│  chmod 755 /var/log/cdc                                                    │
+└────────────────────────────────────────────────────────────────────────────┘
+
+WINDOWS:
+┌────────────────────────────────────────────────────────────────────────────┐
+│  # Criar usuário local (via GUI ou PowerShell)                             │
+│  net user cdcuser <senha> /add /fullname:"CDC Capture User"                │
+│                                                                             │
+│  # Adicionar ao grupo Users                                                │
+│  net localgroup Users cdcuser /add                                         │
+│                                                                             │
+│  # Criar diretórios necessários                                            │
+│  mkdir C:\IBM\CDC\Capture                                                  │
+│  mkdir D:\CDC\Staging                                                      │
+│  mkdir D:\CDC\Logs                                                         │
+│                                                                             │
+│  # Definir permissões (via GUI ou icacls)                                  │
+│  icacls C:\IBM\CDC\Capture /grant cdcuser:(OI)(CI)F                        │
+│  icacls D:\CDC\Staging /grant cdcuser:(OI)(CI)F                            │
+│  icacls D:\CDC\Logs /grant cdcuser:(OI)(CI)F                               │
+└────────────────────────────────────────────────────────────────────────────┘
+
+PERMISSÕES NECESSÁRIAS (Linux):
+┌────────────────────────────────────────────────────────────────────────────┐
+│  • Leitura de transaction logs do banco de dados                          │
+│  • Escrita em diretórios de staging e logs                                │
+│  • Execução de binários CDC                                               │
+│  • Acesso de rede (portas 11001/11002/11003)                              │
+│                                                                             │
+│  Para DB2:                                                                 │
+│  • Adicionar cdcuser ao grupo do DB2 instance owner (ex: db2iadm1)        │
+│    usermod -a -G db2iadm1 cdcuser                                          │
+│                                                                             │
+│  Para PostgreSQL:                                                          │
+│  • Adicionar cdcuser ao grupo postgres (se necessário)                    │
+│    usermod -a -G postgres cdcuser                                          │
+│                                                                             │
+│  Para MySQL:                                                               │
+│  • Adicionar cdcuser ao grupo mysql (se necessário)                       │
+│    usermod -a -G mysql cdcuser                                             │
+└────────────────────────────────────────────────────────────────────────────┘
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  SERVIDOR TARGET - Usuário para Apply Agent                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+LINUX:
+┌────────────────────────────────────────────────────────────────────────────┐
+│  # Criar grupo                                                             │
+│  groupadd cdcgroup                                                         │
+│                                                                             │
+│  # Criar usuário cdcuser                                                   │
+│  useradd -m -g cdcgroup -s /bin/bash cdcuser                               │
+│                                                                             │
+│  # Definir senha                                                           │
+│  passwd cdcuser                                                            │
+│                                                                             │
+│  # Criar diretórios necessários                                            │
+│  mkdir -p /opt/ibm/cdc/apply                                               │
+│  mkdir -p /var/log/cdc                                                     │
+│                                                                             │
+│  # Definir permissões                                                      │
+│  chown -R cdcuser:cdcgroup /opt/ibm/cdc                                    │
+│  chown -R cdcuser:cdcgroup /var/log/cdc                                    │
+│                                                                             │
+│  # Permissões de diretório                                                 │
+│  chmod 755 /opt/ibm/cdc/apply                                              │
+│  chmod 755 /var/log/cdc                                                    │
+└────────────────────────────────────────────────────────────────────────────┘
+
+WINDOWS:
+┌────────────────────────────────────────────────────────────────────────────┐
+│  # Criar usuário local (via GUI ou PowerShell)                             │
+│  net user cdcuser <senha> /add /fullname:"CDC Apply User"                  │
+│                                                                             │
+│  # Adicionar ao grupo Users                                                │
+│  net localgroup Users cdcuser /add                                         │
+│                                                                             │
+│  # Criar diretórios necessários                                            │
+│  mkdir C:\IBM\CDC\Apply                                                    │
+│  mkdir D:\CDC\Logs                                                         │
+│                                                                             │
+│  # Definir permissões (via GUI ou icacls)                                  │
+│  icacls C:\IBM\CDC\Apply /grant cdcuser:(OI)(CI)F                          │
+│  icacls D:\CDC\Logs /grant cdcuser:(OI)(CI)F                               │
+└────────────────────────────────────────────────────────────────────────────┘
+
+PERMISSÕES NECESSÁRIAS (Linux):
+┌────────────────────────────────────────────────────────────────────────────┐
+│  • Escrita em diretórios de logs                                          │
+│  • Execução de binários CDC                                               │
+│  • Acesso de rede (portas 11101/11102/11103)                              │
+│  • Conexão com banco de dados target                                      │
+│                                                                             │
+│  Para DB2:                                                                 │
+│  • Adicionar cdcuser ao grupo do DB2 instance owner (ex: db2iadm1)        │
+│    usermod -a -G db2iadm1 cdcuser                                          │
+│                                                                             │
+│  Para PostgreSQL:                                                          │
+│  • Adicionar cdcuser ao grupo postgres (se necessário)                    │
+│    usermod -a -G postgres cdcuser                                          │
+│                                                                             │
+│  Para MySQL:                                                               │
+│  • Adicionar cdcuser ao grupo mysql (se necessário)                       │
+│    usermod -a -G mysql cdcuser                                             │
+└────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+CONFIGURAÇÃO DE LIMITES DO SISTEMA (LINUX)
+================================================================================
+
+Para garantir que os agentes CDC tenham recursos suficientes, configure os
+limites do sistema operacional:
+
+ARQUIVO: /etc/security/limits.conf
+┌────────────────────────────────────────────────────────────────────────────┐
+│  # Limites para usuário cdcuser                                            │
+│  cdcuser soft nofile 65536                                                 │
+│  cdcuser hard nofile 65536                                                 │
+│  cdcuser soft nproc 16384                                                  │
+│  cdcuser hard nproc 16384                                                  │
+│  cdcuser soft stack 10240                                                  │
+│  cdcuser hard stack 32768                                                  │
+│  cdcuser soft memlock unlimited                                            │
+│  cdcuser hard memlock unlimited                                            │
+└────────────────────────────────────────────────────────────────────────────┘
+
+VERIFICAR LIMITES:
+┌────────────────────────────────────────────────────────────────────────────┐
+│  # Logar como cdcuser e verificar                                          │
+│  su - cdcuser                                                              │
+│  ulimit -a                                                                 │
+└────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+INSTALAÇÃO DOS AGENTES CDC
+================================================================================
+
+Os agentes CDC devem ser instalados usando o usuário cdcuser:
+
+SERVIDOR SOURCE (Capture Agent):
+┌────────────────────────────────────────────────────────────────────────────┐
+│  # Logar como root ou usuário com sudo                                     │
+│  sudo su -                                                                 │
+│                                                                             │
+│  # Executar instalador                                                     │
+│  cd /tmp/cdc_install                                                       │
+│  ./setup.bin                                                               │
+│                                                                             │
+│  Durante a instalação:                                                     │
+│  • Selecionar "Capture Agent"                                              │
+│  • Escolher tipo de banco (DB2/PostgreSQL/MySQL)                          │
+│  • Diretório de instalação: /opt/ibm/cdc/capture                          │
+│  • Usuário para executar serviço: cdcuser                                 │
+│  • Grupo: cdcgroup                                                         │
+│  • Porta do agente: 11001 (DB2), 11002 (PG), 11003 (MySQL)                │
+└────────────────────────────────────────────────────────────────────────────┘
+
+SERVIDOR TARGET (Apply Agent):
+┌────────────────────────────────────────────────────────────────────────────┐
+│  # Logar como root ou usuário com sudo                                     │
+│  sudo su -                                                                 │
+│                                                                             │
+│  # Executar instalador                                                     │
+│  cd /tmp/cdc_install                                                       │
+│  ./setup.bin                                                               │
+│                                                                             │
+│  Durante a instalação:                                                     │
+│  • Selecionar "Apply Agent"                                                │
+│  • Escolher tipo de banco (DB2/PostgreSQL/MySQL)                          │
+│  • Diretório de instalação: /opt/ibm/cdc/apply                            │
+│  • Usuário para executar serviço: cdcuser                                 │
+│  • Grupo: cdcgroup                                                         │
+│  • Porta do agente: 11101 (DB2), 11102 (PG), 11103 (MySQL)                │
+└────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+INICIAR AGENTES CDC COMO SERVIÇO
+================================================================================
+
+LINUX (systemd):
+
+CAPTURE AGENT - Criar arquivo de serviço:
+┌────────────────────────────────────────────────────────────────────────────┐
+│  # Criar arquivo /etc/systemd/system/cdc-capture.service                   │
+│                                                                             │
+│  [Unit]                                                                    │
+│  Description=CDC Capture Agent                                             │
+│  After=network.target                                                      │
+│                                                                             │
+│  [Service]                                                                 │
+│  Type=forking                                                              │
+│  User=cdcuser                                                              │
+│  Group=cdcgroup                                                            │
+│  ExecStart=/opt/ibm/cdc/capture/bin/dmts64 -I <instance_name>             │
+│  ExecStop=/opt/ibm/cdc/capture/bin/dmshutdown -I <instance_name>          │
+│  Restart=on-failure                                                        │
+│  RestartSec=10                                                             │
+│                                                                             │
+│  [Install]                                                                 │
+│  WantedBy=multi-user.target                                                │
+│                                                                             │
+│  # Habilitar e iniciar serviço                                             │
+│  systemctl daemon-reload                                                   │
+│  systemctl enable cdc-capture                                              │
+│  systemctl start cdc-capture                                               │
+│  systemctl status cdc-capture                                              │
+└────────────────────────────────────────────────────────────────────────────┘
+
+APPLY AGENT - Criar arquivo de serviço:
+┌────────────────────────────────────────────────────────────────────────────┐
+│  # Criar arquivo /etc/systemd/system/cdc-apply.service                     │
+│                                                                             │
+│  [Unit]                                                                    │
+│  Description=CDC Apply Agent                                               │
+│  After=network.target                                                      │
+│                                                                             │
+│  [Service]                                                                 │
+│  Type=forking                                                              │
+│  User=cdcuser                                                              │
+│  Group=cdcgroup                                                            │
+│  ExecStart=/opt/ibm/cdc/apply/bin/dmts64 -I <instance_name>               │
+│  ExecStop=/opt/ibm/cdc/apply/bin/dmshutdown -I <instance_name>            │
+│  Restart=on-failure                                                        │
+│  RestartSec=10                                                             │
+│                                                                             │
+│  [Install]                                                                 │
+│  WantedBy=multi-user.target                                                │
+│                                                                             │
+│  # Habilitar e iniciar serviço                                             │
+│  systemctl daemon-reload                                                   │
+│  systemctl enable cdc-apply                                                │
+│  systemctl start cdc-apply                                                 │
+│  systemctl status cdc-apply                                                │
+└────────────────────────────────────────────────────────────────────────────┘
+
+WINDOWS (Serviço):
+┌────────────────────────────────────────────────────────────────────────────┐
+│  # Os agentes CDC no Windows são instalados automaticamente como serviços │
+│  # Configurar para executar como usuário cdcuser:                         │
+│                                                                             │
+│  1. Abrir Services.msc                                                     │
+│  2. Localizar serviço "IBM CDC Capture Agent" ou "IBM CDC Apply Agent"    │
+│  3. Clicar com botão direito → Properties                                 │
+│  4. Aba "Log On"                                                           │
+│  5. Selecionar "This account"                                              │
+│  6. Informar: .\cdcuser (usuário local)                                   │
+│  7. Informar senha                                                         │
+│  8. Aplicar e reiniciar serviço                                           │
+└────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+VERIFICAÇÃO PÓS-INSTALAÇÃO
+================================================================================
+
+VERIFICAR SE AGENTE ESTÁ EXECUTANDO:
+
+Linux:
+┌────────────────────────────────────────────────────────────────────────────┐
+│  # Verificar processo                                                      │
+│  ps -ef | grep dmts64                                                      │
+│                                                                             │
+│  # Verificar porta em escuta                                               │
+│  netstat -tuln | grep 11001  # Capture DB2                                 │
+│  netstat -tuln | grep 11002  # Capture PostgreSQL                          │
+│  netstat -tuln | grep 11003  # Capture MySQL                               │
+│  netstat -tuln | grep 11101  # Apply DB2                                   │
+│  netstat -tuln | grep 11102  # Apply PostgreSQL                            │
+│  netstat -tuln | grep 11103  # Apply MySQL                                 │
+│                                                                             │
+│  # Verificar logs                                                          │
+│  tail -f /var/log/cdc/dmts.log                                             │
+└────────────────────────────────────────────────────────────────────────────┘
+
+Windows:
+┌────────────────────────────────────────────────────────────────────────────┐
+│  # Verificar serviço                                                       │
+│  sc query "IBM CDC Capture Agent"                                          │
+│  sc query "IBM CDC Apply Agent"                                            │
+│                                                                             │
+│  # Verificar porta em escuta                                               │
+│  netstat -an | findstr "11001 11002 11003 11101 11102 11103"               │
+│                                                                             │
+│  # Verificar logs                                                          │
+│  type D:\CDC\Logs\dmts.log                                                 │
+└────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+CHECKLIST DE PREPARAÇÃO DE USUÁRIOS
+================================================================================
+
+SERVIDOR SOURCE:
+[ ] Criar usuário cdcuser no sistema operacional
+[ ] Criar grupo cdcgroup
+[ ] Criar diretórios necessários (/opt/ibm/cdc/capture, /staging/cdc, /var/log/cdc)
+[ ] Definir permissões corretas nos diretórios
+[ ] Adicionar cdcuser ao grupo do banco de dados (se necessário)
+[ ] Configurar limites do sistema (/etc/security/limits.conf)
+[ ] Verificar limites aplicados (ulimit -a)
+[ ] Instalar Capture Agent usando cdcuser
+[ ] Configurar serviço para executar como cdcuser
+[ ] Iniciar serviço e verificar funcionamento
+[ ] Verificar porta em escuta (11001/11002/11003)
+[ ] Verificar logs do agente
+
+SERVIDOR TARGET:
+[ ] Criar usuário cdcuser no sistema operacional
+[ ] Criar grupo cdcgroup
+[ ] Criar diretórios necessários (/opt/ibm/cdc/apply, /var/log/cdc)
+[ ] Definir permissões corretas nos diretórios
+[ ] Adicionar cdcuser ao grupo do banco de dados (se necessário)
+[ ] Configurar limites do sistema (/etc/security/limits.conf)
+[ ] Verificar limites aplicados (ulimit -a)
+[ ] Instalar Apply Agent usando cdcuser
+[ ] Configurar serviço para executar como cdcuser
+[ ] Iniciar serviço e verificar funcionamento
+[ ] Verificar porta em escuta (11101/11102/11103)
+[ ] Verificar logs do agente
+
+
+    APPLY AGENT (MySQL Target):
+    ┌──────────────────────────────────────────────────────────────────────┐
+    │  Porta Padrão:        11103 (TCP)                                    │
+    │  Protocolo:           TCP/IP                                         │
+    │  Direção:             Inbound (recebe conexões do Access Server)     │
+    │  Configurável:        Sim (via dmconfigurets ou arquivo de config)   │
+    │  Arquivo Config:      instance_name.conf                             │
+    │  Parâmetro:           port=11103                                     │
+    └──────────────────────────────────────────────────────────────────────┘
+
+    COMUNICAÇÃO ENTRE AGENTES:
+    ┌──────────────────────────────────────────────────────────────────────┐
+    │  Porta de Dados CDC:  10003 (TCP) - padrão                           │
+    │  Direção:             Capture → Apply                                │
+    │  Configurável:        Sim (definida na subscrição)                   │
+    │  Observação:          Porta usada para transmissão de dados CDC      │
+    └──────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+PORTAS DO ACCESS SERVER E MANAGEMENT CONSOLE
+================================================================================
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│  Componente              │  Porta Padrão  │  Protocolo  │  Finalidade      │
+├────────────────────────────────────────────────────────────────────────────┤
+│  Access Server           │     10101      │  TCP        │  Gerenciamento   │
+│                          │                │             │  de agentes      │
+├────────────────────────────────────────────────────────────────────────────┤
+│  Management Console      │     11701      │  HTTPS      │  Interface Web   │
+│  (Web Interface)         │                │             │  de usuário      │
+└────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+MATRIZ DE CONECTIVIDADE COMPLETA
+================================================================================
+
+ORIGEM                          DESTINO                     PORTA      PROTOCOLO
+─────────────────────────────────────────────────────────────────────────────
+Usuário/Admin             →     Management Console          11701      HTTPS
+Management Console        →     Access Server               10101      TCP
+Access Server             →     Capture Agent (DB2)         11001      TCP
+Access Server             →     Capture Agent (PostgreSQL)  11002      TCP
+Access Server             →     Capture Agent (MySQL)       11003      TCP
+Access Server             →     Apply Agent (DB2)           11101      TCP
+Access Server             →     Apply Agent (PostgreSQL)    11102      TCP
+Access Server             →     Apply Agent (MySQL)         11103      TCP
+Capture Agent (DB2)       →     Apply Agent (DB2)           10001      TCP
+Capture Agent (PostgreSQL)→     Apply Agent (PostgreSQL)    10002      TCP
+Capture Agent (MySQL)     →     Apply Agent (MySQL)         10003      TCP
+
+
+================================================================================
+CONFIGURAÇÃO DE PORTAS CUSTOMIZADAS
+================================================================================
+
+Para alterar as portas padrão dos agentes CDC, utilize o comando dmconfigurets:
+
+LINUX/UNIX:
+┌────────────────────────────────────────────────────────────────────────────┐
+│  # Alterar porta do Capture Agent                                          │
+│  cd /opt/ibm/InfoSphereDataReplication/bin                                 │
+│  ./dmconfigurets -I <instance_name> -p <nova_porta>                        │
+│                                                                             │
+│  Exemplo para DB2:                                                         │
+│  ./dmconfigurets -I db2inst1 -p 11001                                      │
+└────────────────────────────────────────────────────────────────────────────┘
+
+WINDOWS:
+┌────────────────────────────────────────────────────────────────────────────┐
+│  # Alterar porta do Capture Agent                                          │
+│  cd C:\Program Files\IBM\InfoSphereDataReplication\bin                     │
+│  dmconfigurets.exe -I <instance_name> -p <nova_porta>                      │
+│                                                                             │
+│  Exemplo para DB2:                                                         │
+│  dmconfigurets.exe -I db2inst1 -p 11001                                    │
+└────────────────────────────────────────────────────────────────────────────┘
+
+ARQUIVO DE CONFIGURAÇÃO:
+┌────────────────────────────────────────────────────────────────────────────┐
+│  Localização (Linux):                                                      │
+│  /opt/ibm/InfoSphereDataReplication/conf/<instance_name>.conf              │
+│                                                                             │
+│  Localização (Windows):                                                    │
+│  C:\Program Files\IBM\InfoSphereDataReplication\conf\<instance_name>.conf  │
+│                                                                             │
+│  Parâmetro a modificar:                                                    │
+│  port=<numero_da_porta>                                                    │
+└────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+REQUISITOS DE FIREWALL
+================================================================================
+
+REGRAS NECESSÁRIAS PARA CADA TIPO DE BANCO:
+
+DB2:
+┌────────────────────────────────────────────────────────────────────────────┐
+│  • Access Server → Capture Agent DB2:  Porta 11001 (TCP) - Inbound        │
+│  • Access Server → Apply Agent DB2:    Porta 11101 (TCP) - Inbound        │
+│  • Capture Agent → Apply Agent:        Porta 10001 (TCP) - Outbound       │
+└────────────────────────────────────────────────────────────────────────────┘
+
+PostgreSQL:
+┌────────────────────────────────────────────────────────────────────────────┐
+│  • Access Server → Capture Agent PG:   Porta 11002 (TCP) - Inbound        │
+│  • Access Server → Apply Agent PG:     Porta 11102 (TCP) - Inbound        │
+│  • Capture Agent → Apply Agent:        Porta 10002 (TCP) - Outbound       │
+└────────────────────────────────────────────────────────────────────────────┘
+
+MySQL:
+┌────────────────────────────────────────────────────────────────────────────┐
+│  • Access Server → Capture Agent MySQL: Porta 11003 (TCP) - Inbound       │
+│  • Access Server → Apply Agent MySQL:   Porta 11103 (TCP) - Inbound       │
+│  • Capture Agent → Apply Agent:         Porta 10003 (TCP) - Outbound      │
+└────────────────────────────────────────────────────────────────────────────┘
+
+COMANDOS DE FIREWALL (Exemplos):
+
+Linux (firewalld):
+┌────────────────────────────────────────────────────────────────────────────┐
+│  # DB2 Capture Agent                                                       │
+│  firewall-cmd --permanent --add-port=11001/tcp                             │
+│  # DB2 Apply Agent                                                         │
+│  firewall-cmd --permanent --add-port=11101/tcp                             │
+│  # PostgreSQL Capture Agent                                                │
+│  firewall-cmd --permanent --add-port=11002/tcp                             │
+│  # PostgreSQL Apply Agent                                                  │
+│  firewall-cmd --permanent --add-port=11102/tcp                             │
+│  # MySQL Capture Agent                                                     │
+│  firewall-cmd --permanent --add-port=11003/tcp                             │
+│  # MySQL Apply Agent                                                       │
+│  firewall-cmd --permanent --add-port=11103/tcp                             │
+│  # Recarregar firewall                                                     │
+│  firewall-cmd --reload                                                     │
+└────────────────────────────────────────────────────────────────────────────┘
+
+Linux (iptables):
+┌────────────────────────────────────────────────────────────────────────────┐
+│  # DB2 Capture Agent                                                       │
+│  iptables -A INPUT -p tcp --dport 11001 -j ACCEPT                          │
+│  # DB2 Apply Agent                                                         │
+│  iptables -A INPUT -p tcp --dport 11101 -j ACCEPT                          │
+│  # PostgreSQL Capture Agent                                                │
+│  iptables -A INPUT -p tcp --dport 11002 -j ACCEPT                          │
+│  # PostgreSQL Apply Agent                                                  │
+│  iptables -A INPUT -p tcp --dport 11102 -j ACCEPT                          │
+│  # MySQL Capture Agent                                                     │
+│  iptables -A INPUT -p tcp --dport 11003 -j ACCEPT                          │
+│  # MySQL Apply Agent                                                       │
+│  iptables -A INPUT -p tcp --dport 11103 -j ACCEPT                          │
+│  # Salvar regras                                                           │
+│  service iptables save                                                     │
+└────────────────────────────────────────────────────────────────────────────┘
+
+Windows Firewall:
+┌────────────────────────────────────────────────────────────────────────────┐
+│  # DB2 Capture Agent                                                       │
+│  netsh advfirewall firewall add rule name="CDC DB2 Capture" ^              │
+│    dir=in action=allow protocol=TCP localport=11001                        │
+│  # DB2 Apply Agent                                                         │
+│  netsh advfirewall firewall add rule name="CDC DB2 Apply" ^                │
+│    dir=in action=allow protocol=TCP localport=11101                        │
+│  # PostgreSQL Capture Agent                                                │
+│  netsh advfirewall firewall add rule name="CDC PG Capture" ^               │
+│    dir=in action=allow protocol=TCP localport=11002                        │
+│  # PostgreSQL Apply Agent                                                  │
+│  netsh advfirewall firewall add rule name="CDC PG Apply" ^                 │
+│    dir=in action=allow protocol=TCP localport=11102                        │
+│  # MySQL Capture Agent                                                     │
+│  netsh advfirewall firewall add rule name="CDC MySQL Capture" ^            │
+│    dir=in action=allow protocol=TCP localport=11003                        │
+│  # MySQL Apply Agent                                                       │
+│  netsh advfirewall firewall add rule name="CDC MySQL Apply" ^              │
+│    dir=in action=allow protocol=TCP localport=11103                        │
+└────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+VERIFICAÇÃO DE CONECTIVIDADE
+================================================================================
+
+TESTAR CONECTIVIDADE COM TELNET:
+
+Da máquina Windows (Access Server) para Capture Agent:
+┌────────────────────────────────────────────────────────────────────────────┐
+│  # DB2                                                                     │
+│  telnet <ip_servidor_source> 11001                                         │
+│                                                                             │
+│  # PostgreSQL                                                              │
+│  telnet <ip_servidor_source> 11002                                         │
+│                                                                             │
+│  # MySQL                                                                   │
+│  telnet <ip_servidor_source> 11003                                         │
+└────────────────────────────────────────────────────────────────────────────┘
+
+Da máquina Windows (Access Server) para Apply Agent:
+┌────────────────────────────────────────────────────────────────────────────┐
+│  # DB2                                                                     │
+│  telnet <ip_servidor_target> 11101                                         │
+│                                                                             │
+│  # PostgreSQL                                                              │
+│  telnet <ip_servidor_target> 11102                                         │
+│                                                                             │
+│  # MySQL                                                                   │
+│  telnet <ip_servidor_target> 11103                                         │
+└────────────────────────────────────────────────────────────────────────────┘
+
+VERIFICAR SE PORTA ESTÁ ESCUTANDO (no servidor do agente):
+
+Linux:
+┌────────────────────────────────────────────────────────────────────────────┐
+│  # Verificar todas as portas CDC                                           │
+│  netstat -tuln | grep -E '11001|11002|11003|11101|11102|11103'             │
+│                                                                             │
+│  # Ou usando ss (mais moderno)                                             │
+│  ss -tuln | grep -E '11001|11002|11003|11101|11102|11103'                  │
+└────────────────────────────────────────────────────────────────────────────┘
+
+Windows:
+┌────────────────────────────────────────────────────────────────────────────┐
+│  # Verificar todas as portas CDC                                           │
+│  netstat -an | findstr "11001 11002 11003 11101 11102 11103"               │
+└────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+OBSERVAÇÕES IMPORTANTES
+================================================================================
+
+1. PADRÃO DE NUMERAÇÃO:
+   • Capture Agents: 1100X (onde X = 1 para DB2, 2 para PG, 3 para MySQL)
+   • Apply Agents:   1110X (onde X = 1 para DB2, 2 para PG, 3 para MySQL)
+   • Portas de dados CDC: 1000X (mesma lógica)
+
+2. MÚLTIPLAS INSTÂNCIAS:
+   Se você tiver múltiplas instâncias do mesmo tipo de banco, precisará usar
+   portas diferentes para cada instância. Exemplo:
+   • DB2 Instância 1: Capture 11001, Apply 11101
+   • DB2 Instância 2: Capture 11011, Apply 11111
+
+3. REPLICAÇÃO HETEROGÊNEA:
+   Para replicação entre diferentes tipos de bancos (ex: DB2 → PostgreSQL):
+   • Use a porta do Capture Agent correspondente ao banco source
+   • Use a porta do Apply Agent correspondente ao banco target
+   • Exemplo: DB2 (11001) → PostgreSQL (11102)
+
+4. SEGURANÇA:
+   • Considere usar SSL/TLS para comunicação entre componentes
+   • Restrinja acesso às portas apenas aos IPs necessários
+   • Use autenticação forte no Access Server
+   • Monitore logs de acesso regularmente
+
+5. PERFORMANCE:
+   • Portas de dados CDC (100XX) devem ter baixa latência
+   • Considere usar rede dedicada para replicação
+   • Monitore throughput e ajuste buffers se necessário
+
+6. TROUBLESHOOTING:
+   • Se agente não inicia, verifique se porta não está em uso
+   • Use logs do agente para diagnosticar problemas de conectividade
+   • Verifique resolução de nomes (DNS ou hosts)
+   • Confirme que firewalls permitem tráfego bidirecional
+
+
+================================================================================
+REFERÊNCIAS
+================================================================================
+
+IBM Knowledge Center - InfoSphere Data Replication:
+https://www.ibm.com/docs/en/idr
+
+Configuração de Portas:
+https://www.ibm.com/docs/en/idr/11.4.0?topic=replication-configuring-ports
+
+Troubleshooting de Conectividade:
+https://www.ibm.com/docs/en/idr/11.4.0?topic=replication-troubleshooting
+
+================================================================================
+================================================================================
+ARQUITETURA DA SOLUÇÃO CDC
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    CAMADA DE GERENCIAMENTO E CONTROLE                       │
+│                          (Máquina Windows Única)                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    ┌──────────────────────────────────────────────────────────────────────┐
+    │                    🖥️  MÁQUINA WINDOWS                               │
+    │                                                                       │
+    │  ┌────────────────────────────┐  ┌────────────────────────────────┐  │
+    │  │  Management Console        │  │  Access Server                 │  │
+    │  │  (Interface Web)           │  │  (Controle Central)            │  │
+    │  │                            │  │                                │  │
+    │  │  • Porta 11701 (HTTPS)     │  │  • Porta 10101 (TCP)           │  │
+    │  │  • Configuração            │  │  • Gerenciamento de agentes    │  │
+    │  │  • Monitoramento           │  │  • Roteamento de metadados     │  │
+    │  │  • Dashboards              │  │  • Autenticação                │  │
+    │  └────────────────────────────┘  └────────────────────────────────┘  │
+    │                                                                       │
+    │  IP: 192.168.1.10 (exemplo)                                           │
+    │  Hostname: cdc-mgmt-server                                            │
+    └──────────────────────────────────────────────────────────────────────┘
+                    │                                    │
+                    │ TCP 11001/11002/11003              │ TCP 11101/11102/11103
+                    │ (Controle Capture)                 │ (Controle Apply)
+                    │                                    │
+                    ▼                                    ▼
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      CAMADA DE DADOS E AGENTES CDC                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    ┌────────────────────────────────┐      ┌────────────────────────────────┐
+    │   🖥️  SERVIDOR SOURCE          │      │   🖥️  SERVIDOR TARGET          │
+    │                                │      │                                │
+    │  ┌──────────────────────────┐  │      │  ┌──────────────────────────┐  │
+    │  │  Capture Agent           │  │      │  │  Apply Agent             │  │
+    │  │                          │  │      │  │                          │  │
+    │  │  DB2:        Porta 11001 │  │      │  │  DB2:        Porta 11101 │  │
+    │  │  PostgreSQL: Porta 11002 │  │      │  │  PostgreSQL: Porta 11102 │  │
+    │  │  MySQL:      Porta 11003 │  │      │  │  MySQL:      Porta 11103 │  │
+    │  │                          │  │      │  │                          │  │
+    │  │  • Lê transaction logs   │  │      │  │  • Recebe dados CDC      │  │
+    │  │  • Captura CDC           │  │      │  │  • Transforma dados      │  │
+    │  │  • Staging area local    │  │      │  │  • Resolve conflitos     │  │
+    │  │  • Envia para Apply      │──┼──────┼─▶│  • Aplica mudanças       │  │
+    │  └──────────────────────────┘  │      │  └──────────────────────────┘  │
+    │              │                  │      │              │                 │
+    │              │ Acesso local     │      │              │ Acesso local    │
+    │              ▼                  │      │              ▼                 │
+    │  ┌──────────────────────────┐  │      │  ┌──────────────────────────┐  │
+    │  │  💾 Banco de Dados       │  │      │  │  💾 Banco de Dados       │  │
+    │  │  SOURCE                  │  │      │  │  TARGET                  │  │
+    │  │                          │  │      │  │                          │  │
+    │  │  DB2 / PostgreSQL / MySQL│  │      │  │  DB2 / PostgreSQL / MySQL│  │
+    │  │                          │  │      │  │                          │  │
+    │  │  • Tabelas origem        │  │      │  │  • Tabelas replicadas    │  │
+    │  │  • Transaction logs      │  │      │  │  • Control tables        │  │
+    │  │  • Usuário: cdccapture   │  │      │  │  • Usuário: cdcapply     │  │
+    │  └──────────────────────────┘  │      │  └──────────────────────────┘  │
+    │                                │      │                                │
+    │  IP: 192.168.1.20 (exemplo)    │      │  IP: 192.168.1.30 (exemplo)    │
+    │  Hostname: db-source-server    │      │  Hostname: db-target-server    │
+    └────────────────────────────────┘      └────────────────────────────────┘
+
+
+FLUXO DE COMUNICAÇÃO:
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Usuário → Management Console (192.168.1.10:11701)
+   └─> Interface web para configuração e monitoramento
+
+2. Management Console → Access Server (localhost:10101)
+   └─> Comunicação interna na mesma máquina Windows
+
+3. Access Server → Capture Agent (192.168.1.20:1100X)
+   └─> Comandos de controle e configuração
+   └─> X = 1 (DB2), 2 (PostgreSQL), 3 (MySQL)
+
+4. Access Server → Apply Agent (192.168.1.30:1110X)
+   └─> Comandos de controle e configuração
+   └─> X = 1 (DB2), 2 (PostgreSQL), 3 (MySQL)
+
+5. Capture Agent → Apply Agent (192.168.1.20 → 192.168.1.30:1000X)
+   └─> Transmissão de dados CDC (transações)
+   └─> X = 1 (DB2), 2 (PostgreSQL), 3 (MySQL)
+
+6. Capture Agent → Banco Source (acesso local)
+   └─> Leitura de transaction logs
+
+7. Apply Agent → Banco Target (acesso local)
+   └─> Escrita de dados replicados
+
+
+RESUMO DE MÁQUINAS NECESSÁRIAS:
+═══════════════════════════════════════════════════════════════════════════════
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│  Máquina                │  Componentes                │  Sistema Operacional│
+├────────────────────────────────────────────────────────────────────────────┤
+│  1. Servidor de         │  • Management Console       │  Windows Server     │
+│     Gerenciamento       │  • Access Server            │  2016+              │
+│                         │                             │                     │
+├────────────────────────────────────────────────────────────────────────────┤
+│  2. Servidor Source     │  • Capture Agent            │  Linux ou Windows   │
+│                         │  • Banco de Dados Source    │  (conforme BD)      │
+│                         │                             │                     │
+├────────────────────────────────────────────────────────────────────────────┤
+│  3. Servidor Target     │  • Apply Agent              │  Linux ou Windows   │
+│                         │  • Banco de Dados Target    │  (conforme BD)      │
+└────────────────────────────────────────────────────────────────────────────┘
+
+TOTAL: 3 máquinas
+
