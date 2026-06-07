@@ -1,0 +1,31 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="ufLM51pSvgMN4Yb4cNfk">
+    <mxGraphModel dx="1414" dy="766" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="JlA0C_7pM_n0fd6ZD8XW-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;b&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;Máquina WINDOWS&lt;/b&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;div&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="270" width="430" x="350" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="JlA0C_7pM_n0fd6ZD8XW-12" edge="1" parent="1" source="JlA0C_7pM_n0fd6ZD8XW-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="JlA0C_7pM_n0fd6ZD8XW-8" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="JlA0C_7pM_n0fd6ZD8XW-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;" value="&lt;div&gt;&lt;br class=&quot;Apple-interchange-newline&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;b&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;Management Console&lt;/b&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); text-align: left;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); text-align: left;&quot;&gt;- Configuração de subscrições&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;- Monitoramento&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;- Dashboards&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="91" width="180" x="480" y="159" as="geometry" />
+        </mxCell>
+        <mxCell id="JlA0C_7pM_n0fd6ZD8XW-6" edge="1" parent="1" source="JlA0C_7pM_n0fd6ZD8XW-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="JlA0C_7pM_n0fd6ZD8XW-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="JlA0C_7pM_n0fd6ZD8XW-8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;" value="&lt;div&gt;&lt;br class=&quot;Apple-interchange-newline&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;b&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;Access Server&lt;br&gt;&lt;/b&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;- Porta 10101 (TCP)&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;- Gerenciamento de agentes&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;- Autenticação e segurança&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;- Comunicação com agentes&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="100" width="180" x="480" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="JlA0C_7pM_n0fd6ZD8XW-9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="CAMADA DE GERENCIAMENTO E CONTROLE&lt;div&gt;(Máquina Windows Única)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="40" width="430" x="350" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="JlA0C_7pM_n0fd6ZD8XW-11" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="&lt;b&gt;Requisitos Mínimos:&amp;nbsp;&lt;/b&gt;&lt;div&gt;&lt;br&gt;&lt;div&gt;- Windows Server 2016 ou superior (64-bit)&lt;/div&gt;&lt;div&gt;- 16 GB RAM (recomendado 32 GB)&lt;/div&gt;&lt;div&gt;- 8 cores CPU ( recomendado 16 cores)&lt;/div&gt;&lt;div&gt;- 400 GB disco livre&lt;/div&gt;&lt;div&gt;- .NET Framework 4.7.2 ou superior&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="94" width="270" x="790" y="296" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
