@@ -16,9 +16,6 @@
             <mxPoint x="1015" y="440" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="JlA0C_7pM_n0fd6ZD8XW-11" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=1;" value="&lt;b&gt;Requisitos Mínimos:&amp;nbsp;&lt;/b&gt;&lt;div&gt;&lt;br&gt;&lt;div&gt;- Windows Server 2016 ou superior (64-bit)&lt;/div&gt;&lt;div&gt;- 16 GB RAM (recomendado 32 GB)&lt;/div&gt;&lt;div&gt;- 8 cores CPU ( recomendado 16 cores)&lt;/div&gt;&lt;div&gt;- 400 GB disco livre&lt;/div&gt;&lt;div&gt;- .NET Framework 4.7.2 ou superior&lt;/div&gt;&lt;/div&gt;" vertex="1">
-          <mxGeometry height="94" width="270" x="880" y="130" as="geometry" />
-        </mxCell>
         <mxCell id="tYhzWE4TQe1GP2W0sffB-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;dashed=1;" value="" vertex="1">
           <mxGeometry height="190" width="360" x="420" y="100" as="geometry" />
         </mxCell>
